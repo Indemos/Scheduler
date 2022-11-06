@@ -13,8 +13,8 @@
     <Authors>artemiusgreat</Authors>
     <Description>Schedulers for asynchronous execution.</Description>
     <Copyright>http://indemos.com</Copyright>
-    <PackageProjectUrl>https://github.com/Indemos/Scheduler</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/Indemos/Scheduler</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/Indemos/Schedule</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/Indemos/Schedule</RepositoryUrl>
     <PackageTags>scheduler async background process thread</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
