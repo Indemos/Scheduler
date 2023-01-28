@@ -2,11 +2,15 @@
 
 Schedulers for asynchronous execution in the main or background threads.
 
-# Nuget
+# Status
 
 ```
 Install-Package Schedule
 ```
+
+![GitHub Workflow Status (with event)](https://img.shields.io/github/actions/workflow/status/Indemos/Schedule/dotnet.yml?event=push)
+![GitHub](https://img.shields.io/github/license/Indemos/Schedule)
+![GitHub](https://img.shields.io/badge/system-Windows%20%7C%20Linux%20%7C%20Mac-blue)
 
 # Sample 
 
