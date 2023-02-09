@@ -10,10 +10,10 @@
     <IsPackable>true</IsPackable>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Version>1.0.0-prerelease</Version>
-    <Authors>artemiusgreat</Authors>
     <Description>Schedulers for asynchronous execution.</Description>
-    <Copyright>http://indemos.com</Copyright>
-    <PackageProjectUrl>https://github.com/Indemos/Schedule</PackageProjectUrl>
+    <Authors>artemiusgreat</Authors>
+    <Copyright>indemos.com</Copyright>
+    <PackageProjectUrl>http://indemos.com</PackageProjectUrl>
     <RepositoryUrl>https://github.com/Indemos/Schedule</RepositoryUrl>
     <PackageTags>scheduler async background process thread</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
