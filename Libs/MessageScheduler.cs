@@ -30,7 +30,7 @@ namespace ScheduleSpace
     /// <summary>
     /// Scheduler
     /// </summary>
-    public virtual EventLoopScheduler Instance { get; protected set; }
+    public virtual EventLoopScheduler Instance { get; set; }
 
     /// <summary>
     /// Constructor
