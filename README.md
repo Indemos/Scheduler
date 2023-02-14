@@ -16,14 +16,19 @@ Install-Package Schedule
 
 ```C#
 
-// Main thread
+// Guaranteed execution in a single thread for thread-safe access to context variables
 
-var x = 1;
-var y = 1;
-var scheduler = new MessageScheduler();
+var scheduler = new BackgroundRunner();
+var x = scheduler.Send(() => Environment.CurrentManagedThreadId).Task.Result;
+var y = Task.Run(() => scheduler.Send(() => Environment.CurrentManagedThreadId).Task.Result).Result;
 
-// Execution is performed in the background thread
-// Response returns back to the main thread
+Assert.Equal(x, y);
 
-var response = await scheduler.Send<int>(() => x + y).Task;
+// Thread-safe single-threaded timer 
+
+var num = new Random();
+var collection = new List<int>();
+var scheduler = new LoopScheduler();
+
+Observable.Interval(span, scheduler).Subscribe(o => collection.Add(num.Next()));
 ```

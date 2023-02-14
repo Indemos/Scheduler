@@ -5,22 +5,7 @@ using System.Threading.Tasks;
 
 namespace ScheduleSpace
 {
-  public interface IMessageScheduler : IScheduler, IDisposable
-  {
-    /// <summary>
-    /// Action processor
-    /// </summary>
-    /// <param name="action"></param>
-    TaskCompletionSource Send(Action action);
-
-    /// <summary>
-    /// Action processor
-    /// </summary>
-    /// <param name="action"></param>
-    TaskCompletionSource<T> Send<T>(Func<T> action);
-  }
-
-  public class MessageScheduler : IMessageScheduler
+  public class LoopScheduler : IBaseScheduler
   {
     /// <summary>
     /// Scheduler date
@@ -35,13 +20,13 @@ namespace ScheduleSpace
     /// <summary>
     /// Constructor
     /// </summary>
-    public MessageScheduler()
+    public LoopScheduler()
     {
       Instance = new EventLoopScheduler(o => new Thread(o)
       {
         IsBackground = true,
         Priority = ThreadPriority.Highest,
-        Name = nameof(MessageScheduler)
+        Name = nameof(LoopScheduler)
       });
     }
 
@@ -66,11 +51,41 @@ namespace ScheduleSpace
     /// Action processor
     /// </summary>
     /// <param name="action"></param>
+    public virtual TaskCompletionSource Send(Task action)
+    {
+      var completion = new TaskCompletionSource();
+
+      Instance?.Schedule(() =>
+      {
+        action.GetAwaiter().GetResult();
+        completion.TrySetResult();
+      });
+
+      return completion;
+    }
+
+    /// <summary>
+    /// Action processor
+    /// </summary>
+    /// <param name="action"></param>
     public virtual TaskCompletionSource<T> Send<T>(Func<T> action)
     {
       var completion = new TaskCompletionSource<T>();
 
       Instance?.Schedule(() => completion.TrySetResult(action()));
+
+      return completion;
+    }
+
+    /// <summary>
+    /// Action processor
+    /// </summary>
+    /// <param name="action"></param>
+    public virtual TaskCompletionSource<T> Send<T>(Task<T> action)
+    {
+      var completion = new TaskCompletionSource<T>();
+
+      Instance?.Schedule(() => completion.TrySetResult(action.GetAwaiter().GetResult()));
 
       return completion;
     }
