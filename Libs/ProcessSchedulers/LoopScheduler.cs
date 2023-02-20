@@ -3,9 +3,9 @@ using System.Reactive.Concurrency;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace ScheduleSpace
+namespace Schedule.ProcessSchedulerSpace
 {
-  public class LoopScheduler : IBaseScheduler
+  public class LoopScheduler : Runner, IProcessScheduler
   {
     /// <summary>
     /// Scheduler date
@@ -34,7 +34,7 @@ namespace ScheduleSpace
     /// Action processor
     /// </summary>
     /// <param name="action"></param>
-    public virtual TaskCompletionSource Send(Action action)
+    public override TaskCompletionSource Send(Action action)
     {
       var completion = new TaskCompletionSource();
 
@@ -51,7 +51,7 @@ namespace ScheduleSpace
     /// Action processor
     /// </summary>
     /// <param name="action"></param>
-    public virtual TaskCompletionSource Send(Task action)
+    public override TaskCompletionSource Send(Task action)
     {
       var completion = new TaskCompletionSource();
 
@@ -68,7 +68,7 @@ namespace ScheduleSpace
     /// Action processor
     /// </summary>
     /// <param name="action"></param>
-    public virtual TaskCompletionSource<T> Send<T>(Func<T> action)
+    public override TaskCompletionSource<T> Send<T>(Func<T> action)
     {
       var completion = new TaskCompletionSource<T>();
 
@@ -81,7 +81,7 @@ namespace ScheduleSpace
     /// Action processor
     /// </summary>
     /// <param name="action"></param>
-    public virtual TaskCompletionSource<T> Send<T>(Task<T> action)
+    public override TaskCompletionSource<T> Send<T>(Task<T> action)
     {
       var completion = new TaskCompletionSource<T>();
 
@@ -122,6 +122,6 @@ namespace ScheduleSpace
     /// <summary>
     /// Dispose
     /// </summary>
-    public void Dispose() => Instance?.Dispose();
+    public override void Dispose() => Instance?.Dispose();
   }
 }
