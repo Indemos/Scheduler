@@ -1,32 +1,14 @@
 using Schedule.EnumSpace;
-using Schedule.ProcessSchedulerSpace;
 using Schedule.RunnerSpace;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace Tests
 {
-  public class Concurrency
+  public class RunnerTests
   {
-    [Fact]
-    public void Scheduler()
-    {
-      var scheduler = new LoopScheduler();
-      var x1 = Environment.CurrentManagedThreadId;
-      var x2 = scheduler.Send(() => Environment.CurrentManagedThreadId).Task.Result;
-      var x3 = Task.Run(() => scheduler.Send(() => Environment.CurrentManagedThreadId).Task.Result).Result;
-      var x4 = Task.Factory.StartNew(() => scheduler.Send(() => Environment.CurrentManagedThreadId).Task.Result).Result;
-      var x5 = Task.Run(async () => await scheduler.Send(() => Environment.CurrentManagedThreadId).Task).Result;
-
-      Assert.NotEqual(x1, x2);
-      Assert.Equal(x2, x3);
-      Assert.Equal(x3, x4);
-      Assert.Equal(x4, x5);
-    }
-
     [Fact]
     public void Runner()
     {

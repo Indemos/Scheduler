@@ -72,7 +72,10 @@ namespace Schedule.ProcessSchedulerSpace
     {
       var completion = new TaskCompletionSource<T>();
 
-      Instance?.Schedule(() => completion.TrySetResult(action()));
+      Instance?.Schedule(() =>
+      {
+        completion.TrySetResult(action());
+      });
 
       return completion;
     }
@@ -85,7 +88,10 @@ namespace Schedule.ProcessSchedulerSpace
     {
       var completion = new TaskCompletionSource<T>();
 
-      Instance?.Schedule(() => completion.TrySetResult(action.GetAwaiter().GetResult()));
+      Instance?.Schedule(() =>
+      {
+        completion.TrySetResult(action.GetAwaiter().GetResult());
+      });
 
       return completion;
     }
@@ -97,7 +103,10 @@ namespace Schedule.ProcessSchedulerSpace
     /// <param name="state"></param>
     /// <param name="action"></param>
     /// <returns></returns>
-    public virtual IDisposable Schedule<T>(T state, Func<IScheduler, T, IDisposable> action) => Instance?.Schedule(state, action);
+    public virtual IDisposable Schedule<T>(T state, Func<IScheduler, T, IDisposable> action)
+    {
+      return Instance?.Schedule(state, action);
+    }
 
     /// <summary>
     /// Schedule wrapper
@@ -107,7 +116,10 @@ namespace Schedule.ProcessSchedulerSpace
     /// <param name="dueTime"></param>
     /// <param name="action"></param>
     /// <returns></returns>
-    public virtual IDisposable Schedule<TState>(TState state, TimeSpan dueTime, Func<IScheduler, TState, IDisposable> action) => Instance?.Schedule(state, dueTime, action);
+    public virtual IDisposable Schedule<TState>(TState state, TimeSpan dueTime, Func<IScheduler, TState, IDisposable> action)
+    {
+      return Instance?.Schedule(state, dueTime, action);
+    }
 
     /// <summary>
     /// Schedule wrapper
@@ -117,7 +129,10 @@ namespace Schedule.ProcessSchedulerSpace
     /// <param name="dueTime"></param>
     /// <param name="action"></param>
     /// <returns></returns>
-    public virtual IDisposable Schedule<TState>(TState state, DateTimeOffset dueTime, Func<IScheduler, TState, IDisposable> action) => Instance?.Schedule(state, dueTime, action);
+    public virtual IDisposable Schedule<TState>(TState state, DateTimeOffset dueTime, Func<IScheduler, TState, IDisposable> action)
+    {
+      return Instance?.Schedule(state, dueTime, action);
+    }
 
     /// <summary>
     /// Dispose

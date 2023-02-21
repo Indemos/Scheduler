@@ -7,16 +7,6 @@ namespace Schedule
   public interface IRunner : IDisposable
   {
     /// <summary>
-    /// Max number of processes in the queue
-    /// </summary>
-    int Count { get; set; }
-
-    /// <summary>
-    /// Priority that defines which process to handle first
-    /// </summary>
-    PrecedenceEnum Precedence { get; set; }
-
-    /// <summary>
     /// Action processor
     /// </summary>
     /// <param name="action"></param>
@@ -44,19 +34,9 @@ namespace Schedule
   public abstract class Runner : IRunner
   {
     /// <summary>
-    /// Max number of processes in the queue
-    /// </summary>
-    public virtual int Count { get; set; } = int.MaxValue;
-
-    /// <summary>
-    /// Priority that defines which process to handle first
-    /// </summary>
-    public virtual PrecedenceEnum Precedence { get; set; } = PrecedenceEnum.Input;
-
-    /// <summary>
     /// Dispose
     /// </summary>
-    public virtual void Dispose() => Count = int.MaxValue;
+    public virtual void Dispose() { }
 
     /// <summary>
     /// Action processor

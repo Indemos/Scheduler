@@ -2,29 +2,32 @@ using Schedule.EnumSpace;
 using Schedule.ModelSpace;
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Schedule.RunnerSpace
 {
-  public class BackgroundRunner : Runner, IRunner
+  public class TimeRunner : Runner, IRunner
   {
     /// <summary>
-    /// Process
+    /// Updater
     /// </summary>
-    protected IList<Task> _processors;
+    protected DateTime _stamp;
 
     /// <summary>
     /// Wrapper
     /// </summary>
-    protected BlockingCollection<ActionModel> _actions;
+    protected ConcurrentQueue<ActionModel> _actions;
 
     /// <summary>
-    /// Max number of processes in the queue
+    /// Max number of actions in the queue
     /// </summary>
     public virtual int Count { get; set; }
+
+    /// <summary>
+    /// Execution delay
+    /// </summary>
+    public virtual TimeSpan Span { get; set; }
 
     /// <summary>
     /// Priority that defines which process to handle first
@@ -32,44 +35,22 @@ namespace Schedule.RunnerSpace
     public virtual PrecedenceEnum Precedence { get; set; }
 
     /// <summary>
-    /// Constructor
+    /// Time wrapper
     /// </summary>
-    public BackgroundRunner() : this(1, TaskScheduler.Default, CancellationToken.None)
-    {
-    }
+    public virtual Func<DateTime> Time { get; set; }
 
     /// <summary>
     /// Constructor
     /// </summary>
-    public BackgroundRunner(int peocessors) : this(peocessors, TaskScheduler.Default, CancellationToken.None)
-    {
-    }
-
-    /// <summary>
-    /// Constructor
-    /// </summary>
-    /// <param name="processors"></param>
-    /// <param name="scheduler"></param>
-    /// <param name="cancellation"></param>
-    public BackgroundRunner(int processors, TaskScheduler scheduler, CancellationToken cancellation)
+    public TimeRunner()
     {
       _actions = new();
-      _processors = Enumerable
-        .Range(0, processors)
-        .Select(o => Task.Factory.StartNew(Consume, cancellation, TaskCreationOptions.LongRunning, scheduler))
-        .ToList();
+      _stamp = DateTime.MinValue;
 
       Count = int.MaxValue;
+      Span = TimeSpan.Zero;
       Precedence = PrecedenceEnum.Input;
-    }
-
-    /// <summary>
-    /// Dispose
-    /// </summary>
-    public override void Dispose()
-    {
-      _processors.ForEach(o => o.Dispose());
-      _processors.Clear();
+      Time = () => DateTime.UtcNow;
     }
 
     /// <summary>
@@ -160,45 +141,37 @@ namespace Schedule.RunnerSpace
 
           if (_actions.Count >= Count - 1)
           {
-            if (_actions.TryTake(out var o))
+            if (_actions.TryDequeue(out var o))
             {
               o.Error();
             }
           }
 
-          _actions.TryAdd(item);
+          _actions.Enqueue(item);
 
           break;
 
         case PrecedenceEnum.Process:
 
-          if (_actions.Count >= Count - 1)
+          if (_actions.Count >= Count)
           {
             item.Error();
-            return;
           }
 
-          _actions.TryAdd(item);
-          
+          if (_actions.Count < Count)
+          {
+            _actions.Enqueue(item);
+          }
+
           break;
       }
-    }
 
-    /// <summary>
-    /// Background process
-    /// </summary>
-    protected virtual void Consume()
-    {
-      foreach (var action in _actions.GetConsumingEnumerable())
+      var stamp = Time();
+
+      if (stamp > (_stamp + Span))
       {
-        try
-        {
-          action.Success();
-
-        } catch (Exception)
-        {
-          action.Error();
-        }
+        _actions.ForEach(o => o.Success());
+        _stamp = stamp;
       }
     }
   }

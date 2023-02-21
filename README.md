@@ -1,6 +1,14 @@
 # Schedule
 
-Schedulers for asynchronous execution in the main or background threads.
+Schedulers for asynchronous execution in a separate thread. 
+
+# Features 
+
+- Non-blocking execution
+- Non-competing thread-safe execution in a single or multiple threads 
+- Circular buffer of tasks implementing LRU or MRU cache
+- Thread-safe single-threaded timer 
+- Batch execution with delay 
 
 # Status
 
@@ -32,3 +40,7 @@ var scheduler = new LoopScheduler();
 
 Observable.Interval(span, scheduler).Subscribe(o => collection.Add(num.Next()));
 ```
+
+# Roadmap 
+
+Automatically calculate CPU load and spread work across cores.
