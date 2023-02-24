@@ -51,9 +51,10 @@ namespace Tests
     [Fact]
     public void InputPriority()
     {
-      var count = 0;
-      var scheduler = new BackgroundRunner(1) { Count = 10 };
+      var count = -1;
+      var expectation = 10;
       var processes = new List<Task>();
+      var scheduler = new BackgroundRunner(1) { Count = expectation };
 
       for (var i = 0; i < 50; i++)
       {
@@ -65,17 +66,18 @@ namespace Tests
         }).Task);
       }
 
-      Task.WhenAll(processes).Wait();
+      Task.WaitAll(processes.ToArray());
 
-      Assert.Equal(10, count);
+      Assert.Equal(expectation, count);
     }
 
     [Fact]
     public void ProcessPriority()
     {
-      var count = 0;
-      var scheduler = new BackgroundRunner(1) { Count = 10, Precedence = PrecedenceEnum.Process };
+      var count = -1;
+      var expectation = 10;
       var processes = new List<Task>();
+      var scheduler = new BackgroundRunner(1) { Count = expectation, Precedence = PrecedenceEnum.Process };
 
       for (var i = 0; i < 50; i++)
       {
@@ -87,9 +89,9 @@ namespace Tests
         }).Task);
       }
 
-      Task.WhenAll(processes).Wait();
+      Task.WaitAll(processes.ToArray());
 
-      Assert.Equal(10, count);
+      Assert.Equal(expectation, count);
     }
   }
 }

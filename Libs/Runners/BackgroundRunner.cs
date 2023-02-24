@@ -158,7 +158,7 @@ namespace Schedule.RunnerSpace
       {
         case PrecedenceEnum.Input:
 
-          if (_actions.Count >= Count - 1)
+          if (_actions.Count >= Count)
           {
             if (_actions.TryTake(out var o))
             {
@@ -172,7 +172,7 @@ namespace Schedule.RunnerSpace
 
         case PrecedenceEnum.Process:
 
-          if (_actions.Count >= Count - 1)
+          if (_actions.Count >= Count)
           {
             item.Error();
             return;
