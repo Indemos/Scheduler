@@ -1,3 +1,4 @@
+using Newtonsoft.Json.Linq;
 using Schedule.EnumSpace;
 using Schedule.RunnerSpace;
 using System;
@@ -51,47 +52,55 @@ namespace Tests
     [Fact]
     public void InputPriority()
     {
-      var count = -1;
-      var expectation = 10;
+      var value = -1;
       var processes = new List<Task>();
-      var scheduler = new BackgroundRunner(1) { Count = expectation };
+      var scheduler = new BackgroundRunner(1) { Count = 1 };
 
-      for (var i = 0; i < 50; i++)
-      {
-        processes.Add(scheduler.Send(() =>
-        {
-          Task.Delay(10).Wait();
-          count++;
-
-        }).Task);
-      }
+      processes.Add(scheduler.Send(() => value = 1).Task);
+      processes.Add(scheduler.Send(() => value = 2).Task);
+      processes.Add(scheduler.Send(() => value = 3).Task);
 
       Task.WaitAll(processes.ToArray());
 
-      Assert.Equal(expectation, count);
+      Assert.Equal(3, value);
+
+      value = -1;
+      scheduler.Count = 5;
+
+      processes.Add(scheduler.Send(() => value = 1).Task);
+      processes.Add(scheduler.Send(() => value = 2).Task);
+      processes.Add(scheduler.Send(() => value = 3).Task);
+
+      Task.WaitAll(processes.ToArray());
+
+      Assert.Equal(3, value);
     }
 
     [Fact]
     public void ProcessPriority()
     {
-      var count = -1;
-      var expectation = 10;
+      var value = -1;
       var processes = new List<Task>();
-      var scheduler = new BackgroundRunner(1) { Count = expectation, Precedence = PrecedenceEnum.Process };
+      var scheduler = new BackgroundRunner(1) { Count = 1, Precedence = PrecedenceEnum.Process };
 
-      for (var i = 0; i < 50; i++)
-      {
-        processes.Add(scheduler.Send(() =>
-        {
-          Task.Delay(10).Wait();
-          count++;
-
-        }).Task);
-      }
+      processes.Add(scheduler.Send(() => value = 1).Task);
+      processes.Add(scheduler.Send(() => value = 2).Task);
+      processes.Add(scheduler.Send(() => value = 3).Task);
 
       Task.WaitAll(processes.ToArray());
 
-      Assert.Equal(expectation, count);
+      Assert.Equal(1, value);
+
+      value = -1;
+      scheduler.Count = 5;
+
+      processes.Add(scheduler.Send(() => value = 1).Task);
+      processes.Add(scheduler.Send(() => value = 2).Task);
+      processes.Add(scheduler.Send(() => value = 3).Task);
+
+      Task.WaitAll(processes.ToArray());
+
+      Assert.Equal(3, value);
     }
   }
 }
