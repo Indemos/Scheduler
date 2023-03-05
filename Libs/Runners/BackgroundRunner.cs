@@ -12,6 +12,11 @@ namespace Schedule.RunnerSpace
   public class BackgroundRunner : Runner, IRunner
   {
     /// <summary>
+    /// Process controller
+    /// </summary>
+    protected CancellationTokenSource _controller;
+
+    /// <summary>
     /// Process
     /// </summary>
     protected IList<Task> _processors;
@@ -53,6 +58,13 @@ namespace Schedule.RunnerSpace
     /// <param name="cancellation"></param>
     public BackgroundRunner(int processors, TaskScheduler scheduler, CancellationToken cancellation)
     {
+      _controller = new CancellationTokenSource();
+
+      if (Equals(cancellation, CancellationToken.None))
+      {
+        cancellation = _controller.Token;
+      }
+
       _actions = new();
       _processors = Enumerable
         .Range(0, processors)
@@ -68,7 +80,8 @@ namespace Schedule.RunnerSpace
     /// </summary>
     public override void Dispose()
     {
-      _processors.ForEach(o => o.Dispose());
+      _controller.Cancel();
+      _controller.Dispose();
       _processors.Clear();
     }
 
@@ -179,7 +192,7 @@ namespace Schedule.RunnerSpace
           }
 
           _actions.TryAdd(item);
-          
+
           break;
       }
     }
@@ -195,7 +208,8 @@ namespace Schedule.RunnerSpace
         {
           action.Success();
 
-        } catch (Exception)
+        }
+        catch (Exception)
         {
           action.Error();
         }
