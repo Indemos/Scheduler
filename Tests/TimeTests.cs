@@ -1,4 +1,4 @@
-using Schedule.RunnerSpace;
+using Schedule.Runners;
 using System;
 
 namespace Tests

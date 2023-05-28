@@ -7,7 +7,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Schedule.RunnerSpace
+namespace Schedule.Runners
 {
   public class BackgroundRunner : Runner, IRunner
   {

@@ -5,7 +5,7 @@ using System.Collections.Concurrent;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Schedule.RunnerSpace
+namespace Schedule.Runners
 {
   public class TimeRunner : Runner, IRunner
   {
