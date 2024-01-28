@@ -7,7 +7,7 @@ Schedulers for asynchronous execution in a separate thread.
 - Non-blocking execution
 - Non-competing thread-safe execution in a single or multiple threads 
 - Circular buffer of tasks implementing LRU or MRU cache
-- Thread-safe single-threaded timer 
+- Single-threaded timer 
 - Batch execution with delay 
 
 # Status
