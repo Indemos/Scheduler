@@ -49,101 +49,28 @@ namespace Schedule.Runners
 
       Count = int.MaxValue;
       Span = TimeSpan.Zero;
-      Precedence = PrecedenceEnum.Input;
+      Precedence = PrecedenceEnum.Next;
       Time = () => DateTime.UtcNow;
-    }
-
-    /// <summary>
-    /// Action processor
-    /// </summary>
-    /// <param name="action"></param>
-    public override TaskCompletionSource Send(Action action)
-    {
-      var source = new TaskCompletionSource();
-
-      Enqueue(new ActionModel
-      {
-        Error = () => source.TrySetResult(),
-        Success = () =>
-        {
-          action();
-          source.TrySetResult();
-        }
-      });
-
-      return source;
-    }
-
-    /// <summary>
-    /// Task processor
-    /// </summary>
-    /// <param name="action"></param>
-    public override TaskCompletionSource Send(Task action)
-    {
-      var source = new TaskCompletionSource();
-
-      Enqueue(new ActionModel
-      {
-        Error = () => source.TrySetResult(),
-        Success = () =>
-        {
-          action.GetAwaiter().GetResult();
-          source.TrySetResult();
-        }
-      });
-
-      return source;
-    }
-
-    /// <summary>
-    /// Delegate processor
-    /// </summary>
-    /// <param name="action"></param>
-    public override TaskCompletionSource<T> Send<T>(Func<T> action)
-    {
-      var source = new TaskCompletionSource<T>();
-
-      Enqueue(new ActionModel
-      {
-        Error = () => source.TrySetResult(default),
-        Success = () => source.TrySetResult(action())
-      });
-
-      return source;
-    }
-
-    /// <summary>
-    /// Task processor
-    /// </summary>
-    /// <param name="action"></param>
-    public override TaskCompletionSource<T> Send<T>(Task<T> action)
-    {
-      var source = new TaskCompletionSource<T>();
-
-      Enqueue(new ActionModel
-      {
-        Error = () => source.TrySetResult(default),
-        Success = () => source.TrySetResult(action.GetAwaiter().GetResult())
-      });
-
-      return source;
     }
 
     /// <summary>
     /// Enqueue
     /// </summary>
     /// <param name="action"></param>
-    protected virtual void Enqueue(ActionModel item)
+    protected override void Enqueue(ActionModel item)
     {
       switch (Precedence)
       {
-        case PrecedenceEnum.Input:
+        case PrecedenceEnum.Next:
 
           if (_actions.Count >= Count - 1)
           {
             if (_actions.TryDequeue(out var o))
             {
-              o.Error();
+              o.Error(new ErrorModel
+              {
+                Code = ErrorEnum.Excess
+              });
             }
           }
 
@@ -151,17 +78,17 @@ namespace Schedule.Runners
 
           break;
 
-        case PrecedenceEnum.Process:
+        case PrecedenceEnum.Current:
 
           if (_actions.Count >= Count)
           {
-            item.Error();
+            item.Error(new ErrorModel
+            {
+              Code = ErrorEnum.Excess
+            });
           }
 
-          if (_actions.Count < Count)
-          {
-            _actions.Enqueue(item);
-          }
+          _actions.Enqueue(item);
 
           break;
       }

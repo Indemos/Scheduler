@@ -1,4 +1,3 @@
-using Newtonsoft.Json.Linq;
 using Schedule.EnumSpace;
 using Schedule.Runners;
 using System;
@@ -20,10 +19,10 @@ namespace Tests
       var x4 = Task.Factory.StartNew(() => scheduler.Send(() => Environment.CurrentManagedThreadId).Task.Result).Result;
       var x5 = Task.Run(async () => await scheduler.Send(() => Environment.CurrentManagedThreadId).Task).Result;
 
-      Assert.NotEqual(x1, x2);
-      Assert.Equal(x2, x3);
-      Assert.Equal(x3, x4);
-      Assert.Equal(x4, x5);
+      Assert.NotEqual(x1, x2.Data);
+      Assert.Equal(x2.Data, x3.Data);
+      Assert.Equal(x3.Data, x4.Data);
+      Assert.Equal(x4.Data, x5.Data);
     }
 
     [Fact]
@@ -81,7 +80,7 @@ namespace Tests
     {
       var value = -1;
       var processes = new List<Task>();
-      var scheduler = new BackgroundRunner(1) { Count = 1, Precedence = PrecedenceEnum.Process };
+      var scheduler = new BackgroundRunner(1) { Count = 1, Precedence = PrecedenceEnum.Current };
 
       processes.Add(scheduler.Send(() => value = 1).Task);
       processes.Add(scheduler.Send(() => value = 2).Task);

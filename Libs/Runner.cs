@@ -1,4 +1,5 @@
 using Schedule.EnumSpace;
+using Schedule.ModelSpace;
 using System;
 using System.Threading.Tasks;
 
@@ -10,25 +11,25 @@ namespace Schedule
     /// Action processor
     /// </summary>
     /// <param name="action"></param>
-    TaskCompletionSource Send(Action action);
+    TaskCompletionSource<ResponseModel<bool>> Send(Action action);
 
     /// <summary>
     /// Action processor
     /// </summary>
     /// <param name="action"></param>
-    TaskCompletionSource Send(Task action);
+    TaskCompletionSource<ResponseModel<bool>> Send(Task action);
 
     /// <summary>
     /// Action processor
     /// </summary>
     /// <param name="action"></param>
-    TaskCompletionSource<T> Send<T>(Func<T> action);
+    TaskCompletionSource<ResponseModel<T>> Send<T>(Func<T> action);
 
     /// <summary>
     /// Action processor
     /// </summary>
     /// <param name="action"></param>
-    TaskCompletionSource<T> Send<T>(Task<T> action);
+    TaskCompletionSource<ResponseModel<T>> Send<T>(Task<T> action);
   }
 
   public abstract class Runner : IRunner
@@ -42,24 +43,114 @@ namespace Schedule
     /// Action processor
     /// </summary>
     /// <param name="action"></param>
-    public abstract TaskCompletionSource Send(Action action);
+    public virtual TaskCompletionSource<ResponseModel<bool>> Send(Action action)
+    {
+      var response = new ResponseModel<bool>();
+      var source = new TaskCompletionSource<ResponseModel<bool>>();
+
+      Enqueue(new ActionModel
+      {
+        Error = error =>
+        {
+          response.Error = error;
+          source.TrySetResult(response);
+        },
+        Success = () =>
+        {
+          action();
+          response.Data = true;
+          source.TrySetResult(response);
+        }
+      });
+
+      return source;
+    }
 
     /// <summary>
-    /// Action processor
+    /// Task processor
     /// </summary>
     /// <param name="action"></param>
-    public abstract TaskCompletionSource Send(Task action);
+    public virtual TaskCompletionSource<ResponseModel<bool>> Send(Task action)
+    {
+      var response = new ResponseModel<bool>();
+      var source = new TaskCompletionSource<ResponseModel<bool>>();
+
+      Enqueue(new ActionModel
+      {
+        Error = error =>
+        {
+          response.Error = error;
+          source.TrySetResult(response);
+        },
+        Success = async () =>
+        {
+          await action;
+          response.Data = true;
+          source.TrySetResult(response);
+        }
+      });
+
+      return source;
+    }
 
     /// <summary>
-    /// Action processor
+    /// Delegate processor
     /// </summary>
     /// <param name="action"></param>
-    public abstract TaskCompletionSource<T> Send<T>(Func<T> action);
+    public virtual TaskCompletionSource<ResponseModel<T>> Send<T>(Func<T> action)
+    {
+      var response = new ResponseModel<T>();
+      var source = new TaskCompletionSource<ResponseModel<T>>();
+
+      Enqueue(new ActionModel
+      {
+        Error = error =>
+        {
+          response.Error = error;
+          source.TrySetResult(response);
+        },
+        Success = () =>
+        {
+          response.Data = action();
+          source.TrySetResult(response);
+        }
+      });
+
+      return source;
+    }
 
     /// <summary>
-    /// Action processor
+    /// Task processor
     /// </summary>
     /// <param name="action"></param>
-    public abstract TaskCompletionSource<T> Send<T>(Task<T> action);
+    public virtual TaskCompletionSource<ResponseModel<T>> Send<T>(Task<T> action)
+    {
+      var response = new ResponseModel<T>();
+      var source = new TaskCompletionSource<ResponseModel<T>>();
+
+      Enqueue(new ActionModel
+      {
+        Error = error =>
+        {
+          response.Error = error;
+          source.TrySetResult(response);
+        },
+        Success = async () =>
+        {
+          response.Data = await action;
+          source.TrySetResult(response);
+        }
+      });
+
+      return source;
+    }
+
+    /// <summary>
+    /// Enqueue
+    /// </summary>
+    /// <param name="action"></param>
+    protected virtual void Enqueue(ActionModel item)
+    {
+    }
   }
 }

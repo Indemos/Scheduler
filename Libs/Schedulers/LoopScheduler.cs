@@ -1,3 +1,5 @@
+using Schedule.EnumSpace;
+using Schedule.ModelSpace;
 using System;
 using System.Reactive.Concurrency;
 using System.Threading;
@@ -34,14 +36,29 @@ namespace Schedule.Schedulers
     /// Action processor
     /// </summary>
     /// <param name="action"></param>
-    public override TaskCompletionSource Send(Action action)
+    public override TaskCompletionSource<ResponseModel<bool>> Send(Action action)
     {
-      var completion = new TaskCompletionSource();
+      var response = new ResponseModel<bool>();
+      var completion = new TaskCompletionSource<ResponseModel<bool>>();
 
       Instance?.Schedule(() =>
       {
-        action();
-        completion.TrySetResult();
+        try
+        {
+          action();
+          response.Data = true;
+          completion.TrySetResult(response);
+        }
+        catch (Exception e)
+        {
+          response.Error = new ErrorModel
+          {
+            Code = ErrorEnum.Exception,
+            Description = e.Message
+          };
+
+          completion.TrySetResult(response);
+        }
       });
 
       return completion;
@@ -51,14 +68,29 @@ namespace Schedule.Schedulers
     /// Action processor
     /// </summary>
     /// <param name="action"></param>
-    public override TaskCompletionSource Send(Task action)
+    public override TaskCompletionSource<ResponseModel<bool>> Send(Task action)
     {
-      var completion = new TaskCompletionSource();
+      var response = new ResponseModel<bool>();
+      var completion = new TaskCompletionSource<ResponseModel<bool>>();
 
-      Instance?.Schedule(() =>
+      Instance?.Schedule(async () =>
       {
-        action.GetAwaiter().GetResult();
-        completion.TrySetResult();
+        try
+        {
+          await action;
+          response.Data = true;
+          completion.TrySetResult(response);
+        }
+        catch (Exception e)
+        {
+          response.Error = new ErrorModel
+          {
+            Code = ErrorEnum.Exception,
+            Description = e.Message
+          };
+
+          completion.TrySetResult(response);
+        }
       });
 
       return completion;
@@ -68,13 +100,28 @@ namespace Schedule.Schedulers
     /// Action processor
     /// </summary>
     /// <param name="action"></param>
-    public override TaskCompletionSource<T> Send<T>(Func<T> action)
+    public override TaskCompletionSource<ResponseModel<T>> Send<T>(Func<T> action)
     {
-      var completion = new TaskCompletionSource<T>();
+      var response = new ResponseModel<T>();
+      var completion = new TaskCompletionSource<ResponseModel<T>>();
 
       Instance?.Schedule(() =>
       {
-        completion.TrySetResult(action());
+        try
+        {
+          response.Data = action();
+          completion.TrySetResult(response);
+        }
+        catch (Exception e)
+        {
+          response.Error = new ErrorModel
+          {
+            Code = ErrorEnum.Exception,
+            Description = e.Message
+          };
+
+          completion.TrySetResult(response);
+        }
       });
 
       return completion;
@@ -84,13 +131,28 @@ namespace Schedule.Schedulers
     /// Action processor
     /// </summary>
     /// <param name="action"></param>
-    public override TaskCompletionSource<T> Send<T>(Task<T> action)
+    public override TaskCompletionSource<ResponseModel<T>> Send<T>(Task<T> action)
     {
-      var completion = new TaskCompletionSource<T>();
+      var response = new ResponseModel<T>();
+      var completion = new TaskCompletionSource<ResponseModel<T>>();
 
-      Instance?.Schedule(() =>
+      Instance?.Schedule(async () =>
       {
-        completion.TrySetResult(action.GetAwaiter().GetResult());
+        try
+        {
+          response.Data = await action;
+          completion.TrySetResult(response);
+        }
+        catch (Exception e)
+        {
+          response.Error = new ErrorModel
+          {
+            Code = ErrorEnum.Exception,
+            Description = e.Message
+          };
+
+          completion.TrySetResult(response);
+        }
       });
 
       return completion;
