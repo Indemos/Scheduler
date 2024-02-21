@@ -1,8 +1,10 @@
 using Schedule.EnumSpace;
 using Schedule.Runners;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Tests
@@ -12,17 +14,24 @@ namespace Tests
     [Fact]
     public void Runner()
     {
+      var context = SynchronizationContext.Current;
+
       var scheduler = new BackgroundRunner();
       var x1 = Environment.CurrentManagedThreadId;
       var x2 = scheduler.Send(() => Environment.CurrentManagedThreadId).Task.Result;
       var x3 = Task.Run(() => scheduler.Send(() => Environment.CurrentManagedThreadId).Task.Result).Result;
       var x4 = Task.Factory.StartNew(() => scheduler.Send(() => Environment.CurrentManagedThreadId).Task.Result).Result;
       var x5 = Task.Run(async () => await scheduler.Send(() => Environment.CurrentManagedThreadId).Task).Result;
+      //var x6 = scheduler.Send(Task.Run(() => Environment.CurrentManagedThreadId)).Task.Result;
+      var x6 = scheduler.Send(() => Task.Factory.StartNew(() => Environment.CurrentManagedThreadId, CancellationToken.None, TaskCreationOptions.None, TaskScheduler.FromCurrentSynchronizationContext())).Task.Result;
+
+      var x7 = Task.Run(() => Environment.CurrentManagedThreadId).Result;
 
       Assert.NotEqual(x1, x2.Data);
       Assert.Equal(x2.Data, x3.Data);
       Assert.Equal(x3.Data, x4.Data);
       Assert.Equal(x4.Data, x5.Data);
+      Assert.Equal(x5.Data, x6.Data);
     }
 
     [Fact]

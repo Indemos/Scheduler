@@ -15,6 +15,7 @@ namespace Tests
       var x3 = Task.Run(() => scheduler.Send(() => Environment.CurrentManagedThreadId).Task.Result).Result;
       var x4 = Task.Factory.StartNew(() => scheduler.Send(() => Environment.CurrentManagedThreadId).Task.Result).Result;
       var x5 = Task.Run(async () => await scheduler.Send(() => Environment.CurrentManagedThreadId).Task).Result;
+      var x6 = scheduler.Send(Task.Run(() => Environment.CurrentManagedThreadId)).Task.Result;
 
       Assert.NotEqual(x1, x2.Data);
       Assert.Equal(x2.Data, x3.Data);

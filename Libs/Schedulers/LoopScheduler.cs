@@ -73,11 +73,11 @@ namespace Schedule.Schedulers
       var response = new ResponseModel<bool>();
       var completion = new TaskCompletionSource<ResponseModel<bool>>();
 
-      Instance?.Schedule(async () =>
+      Instance?.Schedule(() =>
       {
         try
         {
-          await action;
+          action.GetAwaiter().GetResult();
           response.Data = true;
           completion.TrySetResult(response);
         }
@@ -136,11 +136,42 @@ namespace Schedule.Schedulers
       var response = new ResponseModel<T>();
       var completion = new TaskCompletionSource<ResponseModel<T>>();
 
-      Instance?.Schedule(async () =>
+      Instance?.Schedule(() =>
       {
         try
         {
-          response.Data = await action;
+          response.Data = action.GetAwaiter().GetResult();
+          completion.TrySetResult(response);
+        }
+        catch (Exception e)
+        {
+          response.Error = new ErrorModel
+          {
+            Code = ErrorEnum.Exception,
+            Description = e.Message
+          };
+
+          completion.TrySetResult(response);
+        }
+      });
+
+      return completion;
+    }
+
+    /// <summary>
+    /// Action processor
+    /// </summary>
+    /// <param name="action"></param>
+    public override TaskCompletionSource<ResponseModel<T>> Send<T>(Func<Task<T>> action)
+    {
+      var response = new ResponseModel<T>();
+      var completion = new TaskCompletionSource<ResponseModel<T>>();
+
+      Instance?.Schedule(() =>
+      {
+        try
+        {
+          response.Data = action().GetAwaiter().GetResult();
           completion.TrySetResult(response);
         }
         catch (Exception e)

@@ -1,4 +1,3 @@
-using Schedule.EnumSpace;
 using Schedule.ModelSpace;
 using System;
 using System.Threading.Tasks;
@@ -135,15 +134,42 @@ namespace Schedule
           response.Error = error;
           source.TrySetResult(response);
         },
-        Success = async () =>
+        Success = () =>
         {
-          response.Data = await action;
+          response.Data = action.GetAwaiter().GetResult();
           source.TrySetResult(response);
         }
       });
 
       return source;
     }
+
+    /// <summary>
+    /// Task delegate processor
+    /// </summary>
+    /// <param name="action"></param>
+    public virtual TaskCompletionSource<ResponseModel<T>> Send<T>(Func<Task<T>> action)
+    {
+      var response = new ResponseModel<T>();
+      var source = new TaskCompletionSource<ResponseModel<T>>();
+
+      Enqueue(new ActionModel
+      {
+        Error = error =>
+        {
+          response.Error = error;
+          source.TrySetResult(response);
+        },
+        Success = () =>
+        {
+          response.Data = action().GetAwaiter().GetResult();
+          source.TrySetResult(response);
+        }
+      });
+
+      return source;
+    }
+
 
     /// <summary>
     /// Enqueue
